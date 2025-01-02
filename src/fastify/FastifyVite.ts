@@ -21,8 +21,8 @@ import { View } from '@athenna/view'
 import { Vite } from '#src/vite/Vite'
 import { EdgeError } from 'edge-error'
 import { Config } from '@athenna/config'
-import { Options } from '@athenna/common'
 import type { FastifyInstance } from 'fastify'
+import { Path, Options } from '@athenna/common'
 import type { FastifyViteOptions } from '#src/types'
 import { mergeConfig, type ViteDevServer } from 'vite'
 
@@ -34,10 +34,11 @@ export class FastifyVite {
   public constructor(scope: FastifyInstance, options: FastifyViteOptions) {
     this.scope = scope
     this.options = Options.create(options, {
+      root: Path.pwd(),
       assetsUrl: '/assets',
       buildDirectory: 'public/assets',
       dev: Config.is('app.environment', 'production'),
-      manifestFile: this.options.buildDirectory
+      manifestFile: this.options?.buildDirectory
         ? path.join(this.options.buildDirectory, '.vite/manifest.json')
         : 'public/assets/.vite/manifest.json'
     })
