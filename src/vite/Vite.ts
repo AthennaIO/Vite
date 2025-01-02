@@ -15,7 +15,7 @@
 import path from 'node:path'
 
 import { File } from '@athenna/common'
-import type { FastifyViteOptions } from '#src/types'
+import type { FastifyViteOptions, SetAttributes } from '#src/types'
 import type { Manifest, ModuleNode, ViteDevServer } from 'vite'
 
 const styleFileRegex = /\.(css|less|sass|scss|styl|stylus|pcss|postcss)($|\?)/
@@ -149,22 +149,60 @@ export class Vite {
   }
 
   /**
+   * Unwrap attributes from the user defined function or return
+   * the attributes as it is.
+   */
+  public unwrapAttributes(
+    src: string,
+    url: string,
+    attributes?: SetAttributes
+  ) {
+    if (typeof attributes === 'function') {
+      return attributes({ src, url })
+    }
+
+    return attributes
+  }
+
+  /**
    * Create a style tag for the given path.
    */
-  public makeStyleTag(url: string, attributes?: any) {
+  public makeStyleTag(src: string, url: string, attributes?: any) {
+    const customAttributes = this.unwrapAttributes(
+      src,
+      url,
+      this.options?.styleAttributes
+    )
+
     return this.generateElement({
       tag: 'link',
-      attributes: { rel: 'stylesheet', href: url, ...attributes }
+      attributes: {
+        rel: 'stylesheet',
+        ...customAttributes,
+        ...attributes,
+        href: url
+      }
     })
   }
 
   /**
    * Create a script tag for the given path
    */
-  public makeScriptTag(url: string, attributes?: any) {
+  public makeScriptTag(src: string, url: string, attributes?: any) {
+    const customAttributes = this.unwrapAttributes(
+      src,
+      url,
+      this.options?.scriptAttributes
+    )
+
     return this.generateElement({
       tag: 'script',
-      attributes: { type: 'module', src: url, ...attributes },
+      attributes: {
+        type: 'module',
+        ...customAttributes,
+        ...attributes,
+        src: url
+      },
       children: []
     })
   }
@@ -182,10 +220,10 @@ export class Vite {
     }
 
     if (this.isCssPath(asset)) {
-      return this.makeStyleTag(url, attributes)
+      return this.makeStyleTag(asset, url, attributes)
     }
 
-    return this.makeScriptTag(url, attributes)
+    return this.makeScriptTag(asset, url, attributes)
   }
 
   /**
