@@ -61,9 +61,6 @@ export class FastifyVite {
      * Don't start vite server under production.
      */
     if (this.options.dev) {
-      debug('vite server creation bypassed because app is in production mode.')
-      return
-    } else {
       const { createServer, loadConfigFromFile } = await import('vite')
 
       const defaultConfig = {
@@ -90,6 +87,10 @@ export class FastifyVite {
       await this.scope.register(fastifyMiddie, { hook: 'onRequest' })
 
       this.scope.use(this.devServer.middlewares)
+
+      this.scope.addHook('onClose', () => this.devServer.close())
+    } else {
+      debug('vite server creation bypassed because app is in production mode.')
     }
 
     const vite = new Vite(this.options, this.devServer)
