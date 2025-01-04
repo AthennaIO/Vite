@@ -12,6 +12,8 @@
  * @credit https://github.com/adonisjs/vite
  */
 
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import path from 'node:path'
 import fastifyPlugin from 'fastify-plugin'
 import fastifyMiddie from '@fastify/middie'
@@ -21,10 +23,10 @@ import { View } from '@athenna/view'
 import { Vite } from '#src/vite/Vite'
 import { EdgeError } from 'edge-error'
 import { Config } from '@athenna/config'
+import type { ViteDevServer } from 'vite'
 import type { FastifyInstance } from 'fastify'
 import { Path, Options } from '@athenna/common'
 import type { FastifyViteOptions } from '#src/types'
-import { mergeConfig, type ViteDevServer } from 'vite'
 
 export class FastifyVite {
   public scope: FastifyInstance
@@ -61,9 +63,12 @@ export class FastifyVite {
      * Don't start vite server under production.
      */
     if (this.options.dev) {
-      const { createServer, loadConfigFromFile } = await import('vite')
+      const { mergeConfig, defineConfig, createServer, loadConfigFromFile } =
+        await import('vite')
 
-      const defaultConfig = {
+      const defaultConfig = defineConfig({
+        // @ts-ignore
+        configFile: false,
         server: {
           middlewareMode: true,
           hmr: {
@@ -71,7 +76,7 @@ export class FastifyVite {
           }
         },
         appType: 'custom'
-      }
+      })
 
       const { config } = await loadConfigFromFile(
         {
@@ -82,6 +87,7 @@ export class FastifyVite {
         this.options.root
       )
 
+      // @ts-ignore
       this.devServer = await createServer(mergeConfig(defaultConfig, config))
 
       await this.scope.register(fastifyMiddie, { hook: 'onRequest' })
