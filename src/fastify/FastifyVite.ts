@@ -37,7 +37,7 @@ export class FastifyVite {
     this.scope = scope
     this.options = Options.create(options, {
       root: Path.pwd(),
-      assetsUrl: '/assets',
+      assetsUrl: '/public/assets',
       buildDirectory: 'public/assets',
       dev: Config.is('app.environment', 'production'),
       manifestFile: this.options?.buildDirectory

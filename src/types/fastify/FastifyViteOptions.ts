@@ -57,7 +57,7 @@ export type FastifyViteOptions = {
    * The URL to prefix when generating assets URLs. For example: This
    * could the CDN URL when generating the production build.
    *
-   * @default ''
+   * @default '/public/assets'
    */
   assetsUrl?: string
 
