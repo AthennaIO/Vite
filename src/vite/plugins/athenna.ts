@@ -16,7 +16,7 @@ import { config } from '#src/vite/plugins/config'
 export default function athenna(options: ConfigOptions): PluginOption[] {
   const fullOptions = Object.assign(
     {
-      assetsUrl: '/assets',
+      assetsUrl: '/public/assets',
       buildDirectory: 'public/assets',
       reload: ['./src/resources/views/**/*.edge']
     },
