@@ -9,3 +9,4 @@
 
 export * from '#src/types'
 export * from '#src/vite/Vite'
+export * from '#src/fastify/FastifyVite'
