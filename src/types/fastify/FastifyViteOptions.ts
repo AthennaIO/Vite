@@ -39,6 +39,14 @@ export type FastifyViteOptions = {
   dev?: boolean
 
   /**
+   * The URL to prefix when generating assets URLs. For example: This
+   * could the CDN URL when generating the production build.
+   *
+   * @default '/public/assets'
+   */
+  assetsUrl?: string
+
+  /**
    * Public directory where the assets will be compiled.
    *
    * @default Path.public('assets')
@@ -54,12 +62,27 @@ export type FastifyViteOptions = {
   manifestFile?: string
 
   /**
-   * The URL to prefix when generating assets URLs. For example: This
-   * could the CDN URL when generating the production build.
+   * Path to the SSR entrypoint file that will be used to compile
+   * using `--ssr` option.
    *
-   * @default '/public/assets'
+   * @default 'src/resources/app/app.tsx'
    */
-  assetsUrl?: string
+  ssrEntrypoint?: string
+
+  /**
+   * Public directory where the SSR assets will be compiled.
+   *
+   * @default Path.public('assets/server')
+   */
+  ssrBuildDirectory?: string
+
+  /**
+   * Path to the SSR manifest file relative from the root of
+   * the application.
+   *
+   * @default Path.public('assets/server/.vite/manifest.json')
+   */
+  ssrManifestFile?: string
 
   /**
    * A custom set of attributes to apply on all
