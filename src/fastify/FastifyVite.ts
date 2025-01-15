@@ -30,6 +30,7 @@ import type { FastifyViteOptions } from '#src/types'
 
 export class FastifyVite {
   public scope: FastifyInstance
+  public vite: Vite
   public devServer: ViteDevServer
   public options: FastifyViteOptions
 
@@ -38,7 +39,7 @@ export class FastifyVite {
     this.options = Options.create(options, {
       root: Path.pwd(),
       assetsUrl: '/public/assets',
-      buildDirectory: 'public/assets',
+      buildDirectory: Path.public('assets'),
       dev: Config.is('app.environment', 'production'),
       manifestFile: this.options?.buildDirectory
         ? path.join(this.options.buildDirectory, '.vite/manifest.json')
@@ -52,6 +53,14 @@ export class FastifyVite {
    */
   public getServer() {
     return this.devServer
+  }
+
+  /**
+   * Return vite helper instance. Only available
+   * after calling `ready()` method.
+   */
+  public getVite() {
+    return this.vite
   }
 
   /**
@@ -99,10 +108,10 @@ export class FastifyVite {
       debug('vite server creation bypassed because app is in production mode.')
     }
 
-    const vite = new Vite(this.options, this.devServer)
+    this.vite = new Vite(this.options, this.devServer)
 
-    View.edge.global('vite', vite)
-    View.edge.global('asset', vite.assetPath.bind(vite))
+    View.edge.global('vite', this.vite)
+    View.edge.global('asset', this.vite.assetPath.bind(this.vite))
     View.edge.registerTag({
       tagName: 'viteReactRefresh',
       seekable: true,

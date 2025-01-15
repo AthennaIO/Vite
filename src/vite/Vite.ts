@@ -36,6 +36,12 @@ export class Vite {
   public manifestCache?: Manifest
 
   /**
+   * We cache the SSR manifest file content in production
+   * to avoid reading the file multiple times.
+   */
+  public ssrManifestCache?: Manifest
+
+  /**
    * Vite dev server instance.
    */
   public devServer?: ViteDevServer
@@ -472,6 +478,25 @@ export class Vite {
   }
 
   /**
+   * Returns the SSR manifest file contents.
+   *
+   * @throws Will throw an exception when running in dev.
+   */
+  public ssrManifest(): Manifest {
+    if (this.devServer) {
+      throw new Error(
+        'Cannot read the SSR manifest file when running in dev mode'
+      )
+    }
+
+    if (!this.ssrManifestCache) {
+      this.ssrManifestCache = this.readFileAsJSON(this.options.ssrManifestFile)
+    }
+
+    return this.ssrManifestCache!
+  }
+
+  /**
    * Returns the script needed for the HMR working with React.
    */
   public getReactHmrScript(attributes?: Record<string, any>) {
@@ -495,5 +520,20 @@ export class Vite {
         ''
       ]
     })
+  }
+
+  /**
+   * Safely load an SSR module by looking to the dev
+   * server or the SSR manifest file.
+   */
+  public async ssrLoadModule(modulePath: string) {
+    if (this.devServer) {
+      return this.devServer.ssrLoadModule(modulePath)
+    }
+
+    const ssrManifest = this.ssrManifest()
+    const chunk = this.chunk(ssrManifest, modulePath)
+
+    return import(`${this.options.ssrBuildDirectory}${path.sep}${chunk.file}`)
   }
 }
