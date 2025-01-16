@@ -1,6 +1,6 @@
 {
   "name": "@athenna/vite",
-  "version": "5.9.0",
+  "version": "5.10.0",
   "description": "Vite plugin for Athenna Framework.",
   "license": "MIT",
   "author": "João Lenon <lenon@athenna.io>",
@@ -59,9 +59,11 @@
   "devDependencies": {
     "@athenna/common": "^5.5.0",
     "@athenna/config": "^5.1.0",
+    "@athenna/ioc": "^5.0.0",
     "@athenna/test": "^5.2.0",
     "@athenna/tsconfig": "^5.0.0",
     "@athenna/view": "^5.1.0",
+    "@types/react-dom": "^19.0.3",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "commitizen": "^4.3.1",
@@ -76,6 +78,7 @@
     "husky": "^3.1.0",
     "lint-staged": "^12.5.0",
     "prettier": "^2.8.8",
+    "react-dom": "^19.0.0",
     "vite": "^6.0.6"
   },
   "c8": {

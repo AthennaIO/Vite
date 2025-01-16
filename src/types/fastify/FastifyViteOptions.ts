@@ -77,14 +77,6 @@ export type FastifyViteOptions = {
   ssrBuildDirectory?: string
 
   /**
-   * Path to the SSR manifest file relative from the root of
-   * the application.
-   *
-   * @default Path.public('assets/server/.vite/manifest.json')
-   */
-  ssrManifestFile?: string
-
-  /**
    * A custom set of attributes to apply on all
    * script tags injected by edge `@vite()` tag.
    */
