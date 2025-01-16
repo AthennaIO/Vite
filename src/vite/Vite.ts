@@ -490,7 +490,9 @@ export class Vite {
     }
 
     if (!this.ssrManifestCache) {
-      this.ssrManifestCache = this.readFileAsJSON(this.options.ssrManifestFile)
+      this.ssrManifestCache = this.readFileAsJSON(
+        `${this.options.ssrBuildDirectory}${path.sep}.vite${path.sep}manifest.json`
+      )
     }
 
     return this.ssrManifestCache!
