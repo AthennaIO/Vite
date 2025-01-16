@@ -7,9 +7,27 @@
  * file that was distributed with this source code.
  */
 
+import { Config } from '@athenna/config'
 import type { Vite } from '#src/vite/Vite'
 
 export class React {
+  /**
+   * The same as using `React.loadComponent()` method:
+   *
+   * @example
+   * ```ts
+   * // 'src/resources/app/app.tsx'
+   * const entrypoint = Config.get('http.vite.ssrEntrypoint')
+   *
+   * const { createApp } = await React.loadComponent(entrypoint)
+   * ```
+   */
+  public static async loadEntrypoint<T = any>() {
+    const entrypoint = Config.get('http.vite.ssrEntrypoint')
+
+    return React.loadComponent<T>(entrypoint)
+  }
+
   /**
    * Automatically compile a React component using Vite
    * dev server and import it. In production the server
