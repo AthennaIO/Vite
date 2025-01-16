@@ -40,7 +40,7 @@ export class React {
    */
   public static async loadComponent<T = any>(path: string): Promise<T> {
     const vite: Vite = ioc
-      .safeUse('Athenna/Core/Server')
+      .safeUse('Athenna/Core/HttpServer')
       .getVitePlugin()
       .getVite()
 

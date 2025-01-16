@@ -1,6 +1,6 @@
 {
   "name": "@athenna/vite",
-  "version": "5.11.0",
+  "version": "5.12.0",
   "description": "Vite plugin for Athenna Framework.",
   "license": "MIT",
   "author": "João Lenon <lenon@athenna.io>",
