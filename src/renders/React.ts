@@ -9,8 +9,9 @@
 
 import { Config } from '@athenna/config'
 import type { Vite } from '#src/vite/Vite'
+import { Macroable } from '@athenna/common'
 
-export class React {
+export class React extends Macroable {
   /**
    * The same as using `React.loadComponent()` method:
    *
