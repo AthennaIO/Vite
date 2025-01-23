@@ -14,11 +14,9 @@
 
 import path from 'node:path'
 
-import { File } from '@athenna/common'
+import { File, Is, Macroable, Parser } from '@athenna/common'
 import type { FastifyViteOptions, SetAttributes } from '#src/types'
 import type { Manifest, ModuleNode, ViteDevServer } from 'vite'
-
-const styleFileRegex = /\.(css|less|sass|scss|styl|stylus|pcss|postcss)($|\?)/
 
 export function slash(path: string): string {
   const isExtendedLengthPath = path.startsWith('\\\\?\\')
@@ -28,7 +26,7 @@ export function slash(path: string): string {
   return path.replace(/\\/g, '/')
 }
 
-export class Vite {
+export class Vite extends Macroable {
   /**
    * We cache the manifest file content in production
    * to avoid reading the file multiple times.
@@ -52,6 +50,8 @@ export class Vite {
   public options: FastifyViteOptions
 
   public constructor(options: FastifyViteOptions, devServer?: ViteDevServer) {
+    super()
+
     this.options = options
     this.devServer = devServer
   }
@@ -61,18 +61,6 @@ export class Vite {
    */
   public readFileAsJSON(filePath: string) {
     return new File(filePath).getContentAsJsonSync()
-  }
-
-  /**
-   * Returns a new array with unique items by the given key
-   */
-  public uniqueBy<T>(array: T[], key: keyof T): T[] {
-    const seen = new Set()
-
-    return array.filter(item => {
-      const k = item[key]
-      return seen.has(k) ? false : seen.add(k)
-    })
   }
 
   /**
@@ -98,31 +86,10 @@ export class Vite {
   }
 
   /**
-   * Generates a JSON element with a custom toString implementation.
-   */
-  public generateElement(element: any) {
-    const makeAttributes = this.makeAttributes
-
-    return {
-      ...element,
-      toString() {
-        const attributes = `${makeAttributes(element.attributes)}`
-        if (element.tag === 'link') {
-          return `<${element.tag} ${attributes}/>`
-        }
-
-        return `<${element.tag} ${attributes}>${element.children.join('\n')}</${
-          element.tag
-        }>`
-      }
-    }
-  }
-
-  /**
    * Returns the script needed for the HMR working with Vite.
    */
   public getViteHmrScript(attributes?: any) {
-    return this.generateElement({
+    return Parser.jsonToHTML({
       tag: 'script',
       attributes: {
         type: 'module',
@@ -134,20 +101,10 @@ export class Vite {
   }
 
   /**
-   * Check if the given path is a CSS path.
-   */
-  public isCssPath(path: string) {
-    return path.match(styleFileRegex) !== null
-  }
-
-  /**
    * If the module is a style module.
    */
   public isStyleModule(mod: ModuleNode) {
-    if (
-      this.isCssPath(mod.url) ||
-      (mod.id && /\?vue&type=style/.test(mod.id))
-    ) {
+    if (Is.CssPath(mod.url) || (mod.id && /\?vue&type=style/.test(mod.id))) {
       return true
     }
 
@@ -180,7 +137,7 @@ export class Vite {
       this.options?.styleAttributes
     )
 
-    return this.generateElement({
+    return Parser.jsonToHTML({
       tag: 'link',
       attributes: {
         rel: 'stylesheet',
@@ -201,7 +158,7 @@ export class Vite {
       this.options?.scriptAttributes
     )
 
-    return this.generateElement({
+    return Parser.jsonToHTML({
       tag: 'script',
       attributes: {
         type: 'module',
@@ -225,7 +182,7 @@ export class Vite {
       url = this.generateAssetUrl(asset)
     }
 
-    if (this.isCssPath(asset)) {
+    if (Is.CssPath(asset)) {
       return this.makeStyleTag(asset, url, attributes)
     }
 
@@ -258,11 +215,11 @@ export class Vite {
    * Generate preload tag for a given url.
    */
   public makePreloadTagForUrl(url: string) {
-    const attributes = this.isCssPath(url)
+    const attributes = Is.CssPath(url)
       ? { rel: 'preload', as: 'style', href: url }
       : { rel: 'modulepreload', href: url }
 
-    return this.generateElement({ tag: 'link', attributes })
+    return Parser.jsonToHTML({ tag: 'link', attributes })
   }
 
   /**
@@ -333,7 +290,7 @@ export class Vite {
       this.generateTag(entrypoint, attributes)
     )
     const jsEntrypoints = entryPoints.filter(
-      entrypoint => !this.isCssPath(entrypoint)
+      entrypoint => !Is.CssPath(entrypoint)
     )
 
     /**
@@ -355,7 +312,7 @@ export class Vite {
      */
     const preloadUrls = new Set<string>()
     const visitedModules = new Set<string>()
-    const cssTagsElement = new Set()
+    const cssTagsElement = new Set<string>()
 
     /**
      * Let's search for the CSS files by browsing the module graph
@@ -371,18 +328,19 @@ export class Vite {
      * Once we have the CSS files, generate associated tags
      * that will be injected into the HTML.
      */
-    const elements = Array.from(preloadUrls).map(href =>
-      this.generateElement({
-        tag: 'link',
-        attributes: { rel: 'stylesheet', as: 'style', href }
-      })
-    )
-    elements.forEach(element => cssTagsElement.add(element))
+    Array.from(preloadUrls)
+      .map(href =>
+        Parser.jsonToHTML({
+          tag: 'link',
+          attributes: { rel: 'stylesheet', as: 'style', href }
+        })
+      )
+      .forEach(element => cssTagsElement.add(element))
 
     const viteHmr = this.getViteHmrScript(attributes)
     const result = [...cssTagsElement, viteHmr].concat(tags)
 
-    return result.sort(tag => (tag.tag === 'link' ? -1 : 1))
+    return result.sort(tag => (tag.includes('<link') ? -1 : 1))
   }
 
   /**
@@ -437,8 +395,9 @@ export class Vite {
       }
     }
 
-    const preloadsElements = this.uniqueBy(preloads, 'path')
-      .sort(preload => (this.isCssPath(preload.path) ? -1 : 1))
+    const preloadsElements = preloads.athenna
+      .unique('path')
+      .sort(preload => (Is.CssPath(preload.path) ? -1 : 1))
       .map(preload => this.makePreloadTagForUrl(preload.path))
 
     return preloadsElements.concat(tags.map(({ tag }) => tag))
@@ -506,7 +465,7 @@ export class Vite {
       return null
     }
 
-    return this.generateElement({
+    return Parser.jsonToHTML({
       tag: 'script',
       attributes: {
         type: 'module',

@@ -25,16 +25,18 @@ import { EdgeError } from 'edge-error'
 import { Config } from '@athenna/config'
 import type { ViteDevServer } from 'vite'
 import type { FastifyInstance } from 'fastify'
-import { Path, Options } from '@athenna/common'
 import type { FastifyViteOptions } from '#src/types'
+import { Path, Options, Macroable } from '@athenna/common'
 
-export class FastifyVite {
+export class FastifyVite extends Macroable {
   public scope: FastifyInstance
   public vite: Vite
   public devServer: ViteDevServer
   public options: FastifyViteOptions
 
   public constructor(scope: FastifyInstance, options: FastifyViteOptions) {
+    super()
+
     this.scope = scope
     this.options = Options.create(options, {
       root: Path.pwd(),
@@ -110,10 +112,9 @@ export class FastifyVite {
 
     this.vite = new Vite(this.options, this.devServer)
 
-    View.edge.global('vite', this.vite)
-    View.edge.global('asset', this.vite.assetPath.bind(this.vite))
-    View.edge.registerTag({
-      tagName: 'viteReactRefresh',
+    View.addProperty('vite', this.vite)
+    View.addProperty('asset', this.vite.assetPath.bind(this.vite))
+    View.addTag('viteReactRefresh', {
       seekable: true,
       block: false,
       compile(parser, buffer, token) {
@@ -176,8 +177,7 @@ export class FastifyVite {
       }
     })
 
-    View.edge.registerTag({
-      tagName: 'vite',
+    View.addTag('vite', {
       seekable: true,
       block: false,
       compile(parser, buffer, token) {
