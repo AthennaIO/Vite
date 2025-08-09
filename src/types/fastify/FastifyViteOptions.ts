@@ -65,7 +65,7 @@ export type FastifyViteOptions = {
    * Path to the SSR entrypoint file that will be used to compile
    * using `--ssr` option.
    *
-   * @default 'src/resources/app/app.tsx'
+   * @default 'resources/app/app.tsx'
    */
   ssrEntrypoint?: string
 

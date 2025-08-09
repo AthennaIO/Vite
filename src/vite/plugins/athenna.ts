@@ -18,7 +18,7 @@ export default function athenna(options: ConfigOptions): PluginOption[] {
     {
       assetsUrl: '/public/assets',
       buildDirectory: 'public/assets',
-      reload: ['./src/resources/views/**/*.edge']
+      reload: ['./resources/views/**/*.edge']
     },
     options
   )

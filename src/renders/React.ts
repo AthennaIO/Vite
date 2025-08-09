@@ -17,7 +17,7 @@ export class React extends Macroable {
    *
    * @example
    * ```ts
-   * // 'src/resources/app/app.tsx'
+   * // 'resources/app/app.tsx'
    * const entrypoint = Config.get('http.vite.ssrEntrypoint')
    *
    * const { createApp } = await React.loadComponent(entrypoint)
@@ -36,7 +36,7 @@ export class React extends Macroable {
    *
    * @example
    * ```ts
-   * const { createApp } = await React.loadComponent('src/resources/app/app.tsx')
+   * const { createApp } = await React.loadComponent('resources/app/app.tsx')
    * ```
    */
   public static async loadComponent<T = any>(path: string): Promise<T> {
@@ -53,7 +53,7 @@ export class React extends Macroable {
    *
    * @example
    * ```ts
-   * const { createApp } = await React.loadComponent('src/resources/app/app.tsx')
+   * const { createApp } = await React.loadComponent('resources/app/app.tsx')
    *
    * const htmlElement = await React.renderComponent(createApp(request.baseUrl))
    * ```
